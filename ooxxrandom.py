@@ -48,25 +48,33 @@ def init():
 	for i in range(3):
 		for j in range(3):
 			book[i][j]=0
+f=open('ooxxdata.txt','a')
+f.truncate(0)
 can=[]
 n=0
 color=1
 b=0
 w=0
-def dump():
-	a='  0 1 2\n'
-	for x in range(3):
-		a+=str(x)
-		for y in range(3):
+def printonehot():
+	white=[]
+	black=[]
+	for x in range (3):
+		for y in range (3):
+			if book[x][y]==1:
+				white.append(0)
+				black.append(1)
+			if book[x][y]==2:
+				white.append(1)
+				black.append(0)
 			if book[x][y]==0:
-				a=a+textcolor.color+'172'+textcolor.end+textcolor.bg+'172'+textcolor.end+u'\u25cf '+textcolor.reset
-			elif book[x][y]==1:
-				a=a+textcolor.color+'16'+textcolor.end+textcolor.bg+'172'+textcolor.end+u'\u25cf '+textcolor.reset
-			else:
-				a=a+textcolor.color+'255'+textcolor.end+textcolor.bg+'172'+textcolor.end+u'\u25cf '+textcolor.reset
-		a=a+'\n'
-	print (u'{}'.format(a))
-for i in range(1000000):
+				white.append(0)
+				black.append(0)
+	for i in range(9):
+		f.write(str(black[i])+' ')
+	for i in range(9):
+		f.write(str(white[i])+' ')
+	f.write('\n')
+for i in range(10000):
 	init()
 	color=1
 	while(win()==-1):
@@ -78,8 +86,14 @@ for i in range(1000000):
 		n=randrange(0,len(can))
 		book[can[n][0]][can[n][1]]=color
 		color=(not(color-1))+1
+		printonehot()
 	if win()==1:
 		b+=1
+		f.write("1\n")
 	if win()==2:
 		w+=1
-print 'black='+str(b)+'/1000000\nwhite='+str(w)+'/1000000\nb+w='+str(b+w)
+		f.write("-1\n")
+	if win()==0:
+		f.write("0\n")
+
+f.close()
