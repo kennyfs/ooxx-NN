@@ -7,12 +7,15 @@ class net():
 		self.mc=0.2
 		self.maxtimestrain=100
 		self.nh=6
+		self.nhl=4
 		self.no=1
 		self.errlist=[]
 		self.datamat=[]
 		self.winner=[]
 		self.ndatanum=0
 		self.ndatadim=0
+		self.owb=0
+		self.hwb=[]
 	def loaddata(self):
 		self.datamat=[];self.winner=[]
 		f=open('ooxxdata.txt')
@@ -39,48 +42,77 @@ class net():
 	def sigmoid(self,amat):
 		return 1.0/(1.0+np.exp(-amat))
 	def inith(self):
-		hw=2.0*(np.random.rand(self.nh,self.ndatadim)-0.5)
-		hb=2.0*(np.random.rand(self.nh,1)-0.5)
-		self.hwb=np.mat(self.plusmat(np.mat(hw),np.mat(hb)))
+		for i in range(self.nhl):
+			if i==0:
+				hw=2.0*(np.random.rand(self.nh,self.ndatadim)-0.5)
+				hb=2.0*(np.random.rand(self.nh,1)-0.5)
+			else:
+				hw=2.0*(np.random.rand(self.nh,self.nh)-0.5)
+				hb=2.0*(np.random.rand(self.nh,1)-0.5)
+			self.hwb.append(np.mat(self.plusmat(np.mat(hw),np.mat(hb))))
 	def inito(self):
 		ow=2.0*(np.random.rand(self.no,self.nh)-0.5)
 		ob=2.0*(np.random.rand(self.no,1)-0.5)
 		self.owb=np.mat(self.plusmat(np.mat(ow),np.mat(ob)))
-	def plusmat(self,a,b):
+	def plusmat(self,a,b,c=0):
 		m1,n1=np.shape(a)
 		m2,n2=np.shape(b)
+		if c :print 'm1,m2,n1,n2=',m1,',',m2,',',n1,',',n2
 		if m1!=m2:
 			print 'different rows error'
 			return
 		returnmat=np.zeros([m1,n1+n2])
 		returnmat[:,0:n1]=a[:,0:n1]
-		returnmat[:,n1:(n1+n2)]=b[:,0:n2]
-		return returnmat
+		returnmat[:,(n1):(n1+n2)]=b[:,0:n2]
+		if c:print returnmat
+		return returnmat.copy()
 	def bftrain(self):
 		self.inith();self.inito()
 		data=self.datamat.T
 		winner=np.mat(self.winner)
-		dowbOld=0.0;dhwbOld=0.0
+		dowbOld=0.0
+		dhwbOld=[]
+		for i in range(self.nhl):
+			dhwbOld.append([])
 		i=0
 		while(i<100000):
 			self.eta=0.2-(i+1.0)*(0.2-0.05)/100000
-			h_output=self.sigmoid(self.hwb*data)
-			h2o=self.plusmat(h_output.T,np.ones((self.ndatanum,1))).T
-			o_output=self.sigmoid(self.owb*h2o)
+			h_output=tonext=[]
+			for j in range(self.nhl):				
+				if j==0:
+					h_output.append(self.sigmoid(self.hwb[0]*data))
+					tonext.append(self.plusmat(h_output[0].T,np.ones([self.ndatanum,1])).T)
+					print tonext[-1]
+				else:
+					h_output.append(self.sigmoid(self.hwb[j]*tonext[j-1]))
+					tonext.append(self.plusmat(h_output[j].T,np.ones([self.nh,1])).T)
+			o_output=self.sigmoid(self.owb*tonext[-1])
 			err=winner-o_output
 			sse=self.errorfunc(err)
 			self.errlist.append(sse)
 			o_delta=np.multiply(err,self.dlogit(o_output))
-			h_delta=np.multiply(self.owb[:,:-1].T*o_delta,self.dlogit(h_output))
-			dowb=o_delta*h2o.T
-			dhwb=h_delta*data.T
+			for j in range(nhl):
+				h_delta.append([]);dhwb.append([])
+			j=self.nhl-1
+			while j>=0:
+				if j==nhl-1:
+					h_delta[j]=np.multiply(self.owb[:,:-1].T*o_delta,self.dlogit(h_output[-1]))
+				else:
+					h_delta[j]=np.multiply(self.hwb[j][:,:-1].T*h_delta[j+1],self.dlogit(h_output[j]))
+				dhwb[j]=(h_delta[j]*h_output[j].T)
+				j-=1
+			dowb=o_delta*tonext[-1].T
 			if i==0:
 				self.owb=self.owb+self.eta*dowb
-				self.hwb=self.hwb+self.eta*dhwb
+				for j in range(self.nhl):
+					self.hwb[j]=self.hwb[j]+self.eta*dhwb[j]
 			else:
 				self.owb=self.owb+(1.0-self.mc)*self.eta*dowb+self.mc*dowbOld
-				self.hwb=self.hwb+(1.0-self.mc)*self.eta*dhwb+self.mc*dhwbOld
-			dowbOld=dowb;dhwbOld=dhwb
+				for j in range(self.nhl):
+					self.hwb[j]=self.hwb[j]+(1.0-self.mc)*self.eta*dhwb[j]+self.mc*dhwbOld[j]
+			dowbOld=dowb;
+			for j in range(self.nhl):
+				dhwbOld[j]=dhwb[j]
 			i+=1
 			print 'i:',i,'err:',sse,'eta:',self.eta
 a=net()
