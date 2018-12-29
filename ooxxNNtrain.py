@@ -57,14 +57,12 @@ class net():
 	def plusmat(self,a,b,c=0):
 		m1,n1=np.shape(a)
 		m2,n2=np.shape(b)
-		if c :print 'm1,m2,n1,n2=',m1,',',m2,',',n1,',',n2
 		if m1!=m2:
-			print 'different rows error'
+			print('different rows error')
 			return
 		returnmat=np.zeros([m1,n1+n2])
 		returnmat[:,0:n1]=a[:,0:n1]
 		returnmat[:,(n1):(n1+n2)]=b[:,0:n2]
-		if c:print returnmat
 		return returnmat.copy()
 	def bftrain(self):
 		self.inith();self.inito()
@@ -82,9 +80,10 @@ class net():
 				if j==0:
 					h_output.append(self.sigmoid(self.hwb[0]*data))
 					tonext.append(self.plusmat(h_output[0].T,np.ones([self.ndatanum,1])).T)
-					print tonext[-1]
+					tonext[-1]=np.mat(tonext[-1])
 				else:
-					h_output.append(self.sigmoid(self.hwb[j]*tonext[j-1]))
+					print(np.shape(tonext[-1]))# It's 7*9
+					h_output.append(self.sigmoid(self.hwb[j]*tonext[j-1]))#here, it says it is 6*9
 					tonext.append(self.plusmat(h_output[j].T,np.ones([self.nh,1])).T)
 			o_output=self.sigmoid(self.owb*tonext[-1])
 			err=winner-o_output
@@ -114,7 +113,7 @@ class net():
 			for j in range(self.nhl):
 				dhwbOld[j]=dhwb[j]
 			i+=1
-			print 'i:',i,'err:',sse,'eta:',self.eta
+			print('i:',i,'err:',sse,'eta:',self.eta)
 a=net()
 a.loaddata()
 a.bftrain()

@@ -1,6 +1,6 @@
 import numpy as np
-a=np.ones([86,6])
-b=np.zeros([86,1])
+a=np.mat(([1,1,4],[1,1,1]))
+b=np.ones([3,2])
 def plusmat(a,b):
 	m1,n1=np.shape(a)
 	m2,n2=np.shape(b)
@@ -11,4 +11,4 @@ def plusmat(a,b):
 	returnmat[:,0:n1]=a[:,0:n1]
 	returnmat[:,n1:(n1+n2)]=b[:,0:n2]
 	return returnmat
-print np.shape(plusmat(a,b)),plusmat(a,b).T
+print a*b
