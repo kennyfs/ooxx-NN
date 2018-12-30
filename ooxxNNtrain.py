@@ -4,8 +4,8 @@ class net():
 		self.eb=0.01
 		self.maxtraintimes=1000
 		self.eta=0.05
-		self.mc=0.4
-		self.nh=10
+		self.mc=0.3
+		self.nh=30
 		self.nhl=20
 		self.no=1
 		self.errlist=[]
@@ -18,19 +18,14 @@ class net():
 	def loaddata(self):
 		self.datamat=[];self.winner=[]
 		f=open('ooxxdata.txt')
-		gamelen=0
 		for line in f.readlines():
 			linearr=line.strip().split()
-			linearr=[float(i) for i in linearr]
-			if(len(linearr)==18):
-				gamelen+=1
-				linearr.append(1.0)
-				self.datamat.append(linearr)
-			else:
-				for j in range(gamelen):
-					self.winner.append(linearr[0])
-				gamelen=0
+			b=[float(i) for i in linearr[0:-1]]
+			b.append(1.0)
+			self.datamat.append(b)
+			self.winner.append(float(linearr[-1]))
 		self.datamat=np.mat(self.datamat)
+		self.winner=np.mat(self.winner)
 		m,n=np.shape(self.datamat)
 		self.ndatanum=m
 		self.ndatadim=n-1
@@ -121,3 +116,5 @@ class net():
 a=net()
 a.loaddata()
 a.bftrain()
+print(a.hwb)
+print(a.owb)

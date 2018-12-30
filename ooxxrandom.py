@@ -51,11 +51,9 @@ def init():
 f=open('ooxxdata.txt','a')
 f.truncate(0)
 can=[]
-n=0
+game=[]
 color=1
-b=0
-w=0
-def printonehot():
+def printonehot(color):
 	white=[]
 	black=[]
 	for x in range (3):
@@ -69,14 +67,23 @@ def printonehot():
 			if book[x][y]==0:
 				white.append(0)
 				black.append(0)
-	for i in range(9):
-		f.write(str(black[i])+' ')
-	for i in range(9):
-		f.write(str(white[i])+' ')
-	f.write('\n')
-for i in range(1000):
+	if color==1:
+		game.append([])
+		for i in range(9):
+			game[-1].append(black[i])
+		for i in range(9):
+			game[-1].append(white[i])
+	if color==2:
+		game.append([])
+		for i in range(9):
+			game[-1].append(white[i])
+		for i in range(9):
+			game[-1].append(black[i])
+for i in range(100):
 	init()
 	color=1
+	num=0
+	game=[]
 	while(win()==-1):
 		can=[]
 		for x in range(3):
@@ -86,14 +93,20 @@ for i in range(1000):
 		n=randrange(0,len(can))
 		book[can[n][0]][can[n][1]]=color
 		color=(not(color-1))+1
-		printonehot()
-	if win()==1:
-		b+=1
-		f.write("1\n")
-	if win()==2:
-		w+=1
-		f.write("-1\n")
+		printonehot(color)
+		num+=1
+	ww=win()
+	if not ww==0:
+		for j in range(num):
+			if i%2+1==ww:
+				game[j].append(1)
+			else:
+				game[j].append(-1)
 	if win()==0:
-		f.write("0\n")
-
+		for j in range(num):
+			game[j].append(0)
+	for j in game:
+		for k in j:
+			f.write(str(k)+' ')
+		f.write('\n')
 f.close()
