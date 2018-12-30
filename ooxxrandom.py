@@ -74,7 +74,7 @@ def printonehot():
 	for i in range(9):
 		f.write(str(white[i])+' ')
 	f.write('\n')
-for i in range(1):
+for i in range(1000):
 	init()
 	color=1
 	while(win()==-1):

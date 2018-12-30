@@ -4,10 +4,9 @@ class net():
 		self.eb=0.01
 		self.maxtraintimes=1000
 		self.eta=0.05
-		self.mc=0.2
-		self.maxtimestrain=100
-		self.nh=6
-		self.nhl=4
+		self.mc=0.4
+		self.nh=10
+		self.nhl=20
 		self.no=1
 		self.errlist=[]
 		self.datamat=[]
@@ -58,12 +57,13 @@ class net():
 		m1,n1=np.shape(a)
 		m2,n2=np.shape(b)
 		if m1!=m2:
-			print('different rows error')
+			print('different rows error',m1,'!=',m2)
 			return
 		returnmat=np.zeros([m1,n1+n2])
 		returnmat[:,0:n1]=a[:,0:n1]
 		returnmat[:,(n1):(n1+n2)]=b[:,0:n2]
-		return returnmat.copy()
+		if c:print('heeere',returnmat)
+		return returnmat
 	def bftrain(self):
 		self.inith();self.inito()
 		data=self.datamat.T
@@ -73,32 +73,36 @@ class net():
 		for i in range(self.nhl):
 			dhwbOld.append([])
 		i=0
-		while(i<100000):
-			self.eta=0.2-(i+1.0)*(0.2-0.05)/100000
-			h_output=tonext=[]
-			for j in range(self.nhl):				
+		while(i<10000):
+			self.eta=0.9-(i+1.0)*(0.9-0.05)/10000
+			h_output=[]
+			tonext=[]
+			for j in range(self.nhl):
 				if j==0:
-					h_output.append(self.sigmoid(self.hwb[0]*data))
+					h_output.append(self.sigmoid(self.hwb[0]*data));
 					tonext.append(self.plusmat(h_output[0].T,np.ones([self.ndatanum,1])).T)
-					tonext[-1]=np.mat(tonext[-1])
 				else:
-					print(np.shape(tonext[-1]))# It's 7*9
-					h_output.append(self.sigmoid(self.hwb[j]*tonext[j-1]))#here, it says it is 6*9
-					tonext.append(self.plusmat(h_output[j].T,np.ones([self.nh,1])).T)
+					h_output.append(self.sigmoid(self.hwb[j]*tonext[j-1]));
+					tonext.append(self.plusmat(h_output[j].T,np.ones([self.ndatanum,1])).T)
 			o_output=self.sigmoid(self.owb*tonext[-1])
 			err=winner-o_output
 			sse=self.errorfunc(err)
 			self.errlist.append(sse)
 			o_delta=np.multiply(err,self.dlogit(o_output))
-			for j in range(nhl):
+			h_delta=[]
+			dhwb=[]
+			for j in range(self.nhl):
 				h_delta.append([]);dhwb.append([])
 			j=self.nhl-1
 			while j>=0:
-				if j==nhl-1:
+				if j==self.nhl-1:
 					h_delta[j]=np.multiply(self.owb[:,:-1].T*o_delta,self.dlogit(h_output[-1]))
 				else:
-					h_delta[j]=np.multiply(self.hwb[j][:,:-1].T*h_delta[j+1],self.dlogit(h_output[j]))
-				dhwb[j]=(h_delta[j]*h_output[j].T)
+					h_delta[j]=np.multiply(self.hwb[j+1][:,:-1].T*h_delta[j+1],self.dlogit(h_output[j]))
+				if j==0:
+					dhwb[0]=h_delta[0]*data.T
+				else:
+					dhwb[j]=h_delta[j]*tonext[j-1].T
 				j-=1
 			dowb=o_delta*tonext[-1].T
 			if i==0:
@@ -117,4 +121,3 @@ class net():
 a=net()
 a.loaddata()
 a.bftrain()
-			
