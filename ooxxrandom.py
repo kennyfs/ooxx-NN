@@ -98,7 +98,7 @@ for i in range(100):
 	ww=win()
 	if not ww==0:
 		for j in range(num):
-			if i%2+1==ww:
+			if j%2+1==ww:
 				game[j].append(1)
 			else:
 				game[j].append(-1)
