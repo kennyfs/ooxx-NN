@@ -17,11 +17,13 @@ class Env:
 		action -= color*9
 		x = action//3
 		y = action%3
+		if self.grid[x,y,color] == 1.0:
+			return -1.0
 		self.grid[x,y,color] = 1.0
 		res = self.result()
 		if res != None:
-			return 1
-		return 0
+			return 1.0
+		return 0.0
 	
 	def render(self):
 		for i in range(3):
@@ -47,3 +49,6 @@ class Env:
 	
 	def terminate(self):
 		return self.result() != None
+
+	def get_state(self):
+		return self.grid
